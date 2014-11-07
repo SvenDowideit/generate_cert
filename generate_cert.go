@@ -1,9 +1,10 @@
 // Usage:
 //  Generate CA
 //    ./generate_cert --cert ca.pem --key ca-key.pem
+//  Generate CA overwriting existing files
+//    ./generate_cert --cert ca.pem --key ca-key.pem --overwrite
 //  Generate signed certificate
 //    ./generate_cert --host 127.0.0.1 --cert cert.pem --key key.pem --ca ca.pem --ca-key ca-key.pem
-
 package main
 
 import (
@@ -14,6 +15,7 @@ import (
 	"crypto/x509/pkix"
 	"encoding/pem"
 	"flag"
+	"fmt"
 	"log"
 	"math/big"
 	"net"
@@ -23,11 +25,12 @@ import (
 )
 
 var (
-	host     = flag.String("host", "", "Comma-separated hostnames and IPs to generate a certificate for")
-	certFile = flag.String("cert", "", "Output file for certificate")
-	keyFile  = flag.String("key", "", "Output file for key")
-	ca       = flag.String("ca", "", "Certificate authority file to sign with")
-	caKey    = flag.String("ca-key", "", "Certificate authority key file to sign with")
+	host      = flag.String("host", "", "Comma-separated hostnames and IPs to generate a certificate for")
+	certFile  = flag.String("cert", "", "Output file for certificate")
+	keyFile   = flag.String("key", "", "Output file for key")
+	ca        = flag.String("ca", "", "Certificate authority file to sign with")
+	caKey     = flag.String("ca-key", "", "Certificate authority key file to sign with")
+	overwrite = flag.Bool("overwrite", false, "Overwrite existing files")
 )
 
 const (
@@ -51,12 +54,22 @@ func main() {
 		if *caKey != "" {
 			log.Fatalf("Must provide both --ca and --ca-key")
 		}
+		if !*overwrite {
+			if err := checkFilesExist(*certFile, *keyFile); err != nil {
+				log.Fatalf("Preventing overwrite: %v", err)
+			}
+		}
 		if err := GenerateCA(*certFile, *keyFile); err != nil {
-			log.Fatalf("Failured to generate CA: %s", err)
+			log.Fatalf("Failure to generate CA: %s", err)
 		}
 	} else {
+		if !*overwrite {
+			if err := checkFilesExist(*certFile, *keyFile); err != nil {
+				log.Fatalf("Preventing overwrite: %v", err)
+			}
+		}
 		if err := GenerateCert(strings.Split(*host, ","), *certFile, *keyFile, *ca, *caKey); err != nil {
-			log.Fatalf("Failured to generate cert: %s", err)
+			log.Fatalf("Failure to generate cert: %s", err)
 		}
 	}
 }
@@ -84,6 +97,26 @@ func newCertificate() *x509.Certificate {
 		//		ExtKeyUsage:           []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 		BasicConstraintsValid: true,
 	}
+}
+
+// checkFilesExist will verify that the specified files do not exist.
+// If they do it will return an error listing the existing files.
+// Other errors from os.Stat are returned.
+func checkFilesExist(files ...string) error {
+	existingFiles := make([]string, 0, len(files))
+	for _, file := range files {
+		_, err := os.Stat(file)
+		if !os.IsNotExist(err) {
+			if err != nil {
+				return err
+			}
+			existingFiles = append(existingFiles, fmt.Sprintf("%q", file))
+		}
+	}
+	if len(existingFiles) > 0 {
+		return fmt.Errorf("the following files already exist: %s. To overwrite files, add `--overwrite`.", strings.Join(existingFiles, " "))
+	}
+	return nil
 }
 
 // GenerateCA generates a new certificate authority
