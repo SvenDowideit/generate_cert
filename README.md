@@ -1,5 +1,4 @@
-generate_cert
-=============
+# generate_cert
 
 generate the tls certs needed for Docker TLS socket.
 
@@ -17,4 +16,6 @@ then back on your OSX box, you can run:
 
 - docker -H 192.168.59.103:2376 --tls version
 
+## Building
 
+There's a Makefile, which then uses the Dockerfile to generate Linux, OSX and Windows binaries
