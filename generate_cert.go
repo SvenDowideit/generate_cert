@@ -28,12 +28,12 @@ var (
 	keyFile  = flag.String("key", "", "Output file for key")
 	ca       = flag.String("ca", "", "Certificate authority file to sign with")
 	caKey    = flag.String("ca-key", "", "Certificate authority key file to sign with")
+	org      = flag.String("org", "Boot2Docker", "Organization to generate a certificate for")
 )
 
 const (
 	RSABITS  = 2048
 	VALIDFOR = 1080 * 24 * time.Hour
-	ORG      = "Boot2Docker"
 )
 
 func main() {
@@ -75,7 +75,7 @@ func newCertificate() *x509.Certificate {
 	return &x509.Certificate{
 		SerialNumber: serialNumber,
 		Subject: pkix.Name{
-			Organization: []string{ORG},
+			Organization: []string{*org},
 		},
 		NotBefore: notBefore,
 		NotAfter:  notAfter,
