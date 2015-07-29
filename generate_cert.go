@@ -25,18 +25,18 @@ import (
 )
 
 var (
-	host     = flag.String("host", "", "Comma-separated hostnames and IPs to generate a certificate for")
-	certFile = flag.String("cert", "", "Output file for certificate")
-	keyFile  = flag.String("key", "", "Output file for key")
-	ca       = flag.String("ca", "", "Certificate authority file to sign with")
-	caKey    = flag.String("ca-key", "", "Certificate authority key file to sign with")
+	host      = flag.String("host", "", "Comma-separated hostnames and IPs to generate a certificate for")
+	certFile  = flag.String("cert", "", "Output file for certificate")
+	keyFile   = flag.String("key", "", "Output file for key")
+	ca        = flag.String("ca", "", "Certificate authority file to sign with")
+	caKey     = flag.String("ca-key", "", "Certificate authority key file to sign with")
 	overwrite = flag.Bool("overwrite", false, "Overwrite existing files")
-	org      = flag.String("org", "Boot2Docker", "Organization to generate a certificate for")
+	org       = flag.String("org", "Boot2Docker", "Organization to generate a certificate for")
+	days      = flag.Int("days", 365, "How long till expiry of a signed certificate - def 365 days")
 )
 
 const (
-	RSABITS  = 2048
-	VALIDFOR = 1080 * 24 * time.Hour
+	RSABITS = 2048
 )
 
 func main() {
@@ -77,7 +77,7 @@ func main() {
 // newCertificate creates a new template
 func newCertificate() *x509.Certificate {
 	notBefore := time.Now()
-	notAfter := notBefore.Add(time.Hour * 24 * 1080)
+	notAfter := notBefore.Add(time.Hour * 24 * time.Duration(*days))
 
 	serialNumberLimit := new(big.Int).Lsh(big.NewInt(1), 128)
 	serialNumber, err := rand.Int(rand.Reader, serialNumberLimit)
