@@ -1,5 +1,5 @@
 
-FROM golang:1.3-cross
+FROM golang:1.4.2-cross
 
 ADD . /go/src/github.com/SvenDowideit/generate_cert
 WORKDIR /go/src/github.com/SvenDowideit/generate_cert
