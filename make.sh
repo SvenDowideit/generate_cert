@@ -10,7 +10,7 @@ cp generate_cert ${HOME}/.docker/
 #cd ${HOME}/.docker/boot2docker
 cd ${HOME}/.docker
 
-./generate_cert --cert=ca.pem --key=cakey.pem
+./generate_cert --cert=ca.pem --key=cakey.pem --org="Boot2Docker CA Cert"
 ./generate_cert --host=boot2docker,192.168.59.103 --ca=ca.pem --ca-key=cakey.pem --cert=servercert.pem --key=serverkey.pem
 ./generate_cert --ca=ca.pem --ca-key=cakey.pem --cert=cert.pem --key=key.pem
 

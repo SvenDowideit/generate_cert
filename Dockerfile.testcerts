@@ -1,0 +1,12 @@
+
+# docker build -t b2d-test-cert - < Dockerfile.testcerts
+# docker run --rm --net=host -v /var/lib/boot2docker:/var/lib/boot2docker b2d-test-cert 
+
+FROM debian:testing
+MAINTAINER Sven Dowideit <SvenDowideit@home.org.au>
+
+RUN apt-get update \
+	&& apt-get install -yq openssl
+RUN openssl version
+
+CMD openssl s_client -showcerts -connect 127.0.0.1:2376 -key /var/lib/boot2docker/tls/key.pem -cert /var/lib/boot2docker/tls/cert.pem -CAfile /var/lib/boot2docker/tls/ca.pem -tls1
