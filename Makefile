@@ -1,7 +1,7 @@
 VERSION := $(shell cat VERSION)
 GITSHA1 := $(shell git rev-parse --short HEAD)
 GOARCH := amd64
-GOFLAGS := -ldflags "-X main.Version $(VERSION) -X main.GitSHA $(GITSHA1)"
+GOFLAGS := -ldflags "-X main.Version=$(VERSION) -X main.GitSHA=$(GITSHA1) -s"
 PREFIX := generate_cert
 DOCKER_IMAGE := generate_cert-golang
 DOCKER_CONTAINER := generate_cert-cli-build
@@ -35,7 +35,7 @@ all: darwin linux windows
 
 # Native Go build per OS/ARCH combo.
 %:
-	GOOS=$@ GOARCH=$(GOARCH) go build $(GOFLAGS) -o $(PREFIX)-$(VERSION)-$@-$(GOARCH)$(if $(filter windows, $@),.exe)
+	CGO_ENABLED=0 GOOS=$@ GOARCH=$(GOARCH) go build $(GOFLAGS) -a -installsuffix cgo -o $(PREFIX)-$(VERSION)-$@-$(GOARCH)$(if $(filter windows, $@),.exe)
 
 
 # This binary will be installed at $GOBIN or $GOPATH/bin. Requires proper
