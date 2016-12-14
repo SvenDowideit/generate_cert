@@ -7,7 +7,6 @@ DOCKER_IMAGE := generate_cert-golang
 DOCKER_CONTAINER := generate_cert-cli-build
 DOCKER_SRC_PATH := /go/src/github.com/SvenDowideit/generate_cert
 
-
 default: dockerbuild
 	@true # stop from matching "%" later
 
@@ -29,9 +28,15 @@ clean:
 	docker rm "$(DOCKER_CONTAINER)" 2>/dev/null || true
 
 
+release: all
+	echo "release $(VERSION)"
+	github-release release -u SvenDowideit -r generate_cert -t $(VERSION) --draft
+	github-release upload -u SvenDowideit -r generate_cert -t $(VERSION) -f $(PREFIX)-$(VERSION)-darwin-$(GOARCH) -n $(PREFIX)-$(VERSION)-darwin-$(GOARCH)
+	github-release upload -u SvenDowideit -r generate_cert -t $(VERSION) -f $(PREFIX)-$(VERSION)-linux-$(GOARCH) -n $(PREFIX)-$(VERSION)-linux-$(GOARCH)
+	github-release upload -u SvenDowideit -r generate_cert -t $(VERSION) -f $(PREFIX)-$(VERSION)-windows-$(GOARCH).exe -n $(PREFIX)-$(VERSION)-windows-$(GOARCH).exe
+
 all: darwin linux windows
 	@true # stop "all" from matching "%" later
-
 
 # Native Go build per OS/ARCH combo.
 %:
