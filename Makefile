@@ -47,3 +47,9 @@ all: darwin linux windows
 # $GOPATH setup AND the location of the source directory in $GOPATH.
 goinstall:
 	go install $(GOFLAGS)
+
+buildregistry:
+	docker build -t registry registry
+
+runregistry:
+	docker run --rm -it --net host -p 5000:5000 registry
